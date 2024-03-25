@@ -1,9 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table"
-
-import { Badge } from "../components/ui/badge";
 import { Checkbox } from "../components/ui/checkbox";
-
-import { labels, priorities, statuses } from "../data/data"
+import { priorities, statuses } from "../data/data"
 import { DataTableColumnHeader } from "./data-table-column-header"
 import { DataTableRowActions } from "./data-table-row-actions"
 
@@ -68,11 +65,8 @@ export const columns: ColumnDef<Task>[] = [
       <DataTableColumnHeader column={column} title="Title" />
     ),
     cell: ({ row }) => {
-      const label = labels.find((label) => label.value === row.original.title)
-
       return (
         <div className="flex space-x-2">
-          {label && <Badge variant="outline">{label.label}</Badge>}
           <span className="max-w-[500px] truncate font-medium">
             {row.getValue("title")}
           </span>
@@ -89,8 +83,6 @@ export const columns: ColumnDef<Task>[] = [
       const status = statuses.find(
         (status) => status.value === row.getValue("status")
       )
-        console.log(row.getValue("status"));
-        console.log(statuses)
       if (!status) {
         return null
       }
@@ -132,6 +124,23 @@ export const columns: ColumnDef<Task>[] = [
       )
     },
     filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
+  },
+  {
+    accessorKey: "due_date",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Due date" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex items-center">
+          <span>{row.getValue("due_date")}</span>
+        </div>
+      )
+    },
+    filterFn: (row, id, value) => {
+      console.log(row, id, value);
       return value.includes(row.getValue(id))
     },
   },
