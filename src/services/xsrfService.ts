@@ -1,10 +1,10 @@
 import axios from 'axios';
 import { Task } from '../interfaces/taskInterface';
 
-class TaskService {
+class XsrfService {
   private BASE_URL = process.env.REACT_APP_SANCTUM_BACKEND + "/api" || "";
 
-  public async fetchTasks(): Promise<Task[]> {
+  public async fetchXsrfToken(): Promise<Task[]> {
     try {
       const response = await axios.get<Task[]>(`${this.BASE_URL}/tasks`);
       return response.data;
@@ -15,4 +15,4 @@ class TaskService {
   }
 }
 
-export default new TaskService();
+export default new XsrfService();
