@@ -3,27 +3,7 @@ import { Checkbox } from "../components/ui/checkbox";
 import { priorities, statuses } from "../data/data"
 import { DataTableColumnHeader } from "./data-table-column-header"
 import { DataTableRowActions } from "./data-table-row-actions"
-
-
-export enum TaskStatus {
-  COMPLETED = "completed",
-  PENDING = "pending",
-  IN_PROGRESS = "in_progress"
-}
-
-export enum TaskPriority {
-  LOW = "low",
-  MEDIUM = "medium",
-  HIGH = "high"
-}
-
-export interface Task {
-  id: number,
-  title: string,
-  status: TaskStatus
-  due_date: string,
-  priority: TaskPriority
-}
+import { Task } from "../interfaces/taskInterface";
 
 export const columns: ColumnDef<Task>[] = [
   {
@@ -140,7 +120,6 @@ export const columns: ColumnDef<Task>[] = [
       )
     },
     filterFn: (row, id, value) => {
-      console.log(row, id, value);
       return value.includes(row.getValue(id))
     },
   },
