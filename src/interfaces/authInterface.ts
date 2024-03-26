@@ -9,3 +9,9 @@ export interface AuthContextType {
 export interface AuthProviderProps {
     children: ReactNode;
 }
+
+export interface LoginReponse {
+    status: string,
+    message: string,
+    bearerToken: string
+}
