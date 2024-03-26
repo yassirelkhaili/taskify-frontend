@@ -15,3 +15,8 @@ export interface LoginReponse {
     message: string,
     bearerToken: string
 }
+
+export interface LoginRequest {
+    email: string,
+    password: string
+}

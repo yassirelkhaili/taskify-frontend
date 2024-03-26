@@ -13,7 +13,10 @@ import {
 import { Input } from "../../components/ui/input";
 import { toast } from "sonner";
 import Loader from "../../components/ui/loader";
-import authService from "@/src/services/authService";
+import AuthService from "../../services/authService";
+import { useState, useLayoutEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../providers/AuthProvider";
 
 const formSchema = z.object({
   email: z
@@ -34,6 +37,14 @@ const formSchema = z.object({
 });
 
 const Login = () => {
+  const [isLoading, setisLoading] = useState<boolean>(false);
+  const { isAuthenticated, login } = useAuth();
+  const navigate = useNavigate();
+
+  useLayoutEffect(() => {
+    isAuthenticated && navigate("/dashboard", { replace: true });
+  }, [isAuthenticated, navigate]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -42,8 +53,21 @@ const Login = () => {
     },
   });
 
-  const handleSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log("submitted");
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    setisLoading(true);
+    try {
+      const { bearerToken } = await AuthService.login(values);
+      localStorage.setItem("accessToken", JSON.stringify(bearerToken));
+      login();
+      navigate("/dashboard", { replace: true });
+      setisLoading(false);
+    } catch (error) {
+      toast.error(
+        "Failed to login. Please check your credentials and try again."
+      );
+      console.error(error);
+      setisLoading(false);
+    }
   };
 
   return (
@@ -95,12 +119,16 @@ const Login = () => {
                       </FormItem>
                     )}
                   />
-                  <Button
-                    type="submit"
-                    className="w-full text-white bg-blue-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-                  >
-                    Login
-                  </Button>
+                  {!isLoading ? (
+                    <Button
+                      type="submit"
+                      className="w-full text-white bg-blue-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                    >
+                      Login
+                    </Button>
+                  ) : (
+                    <Loader />
+                  )}
                 </form>
               </Form>
             </div>

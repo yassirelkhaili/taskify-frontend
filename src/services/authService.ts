@@ -1,21 +1,21 @@
 import axios from 'axios';
 import { Task } from '../interfaces/taskInterface';
-import { LoginReponse } from '../interfaces/authInterface';
+import type { LoginReponse, LoginRequest } from '../interfaces/authInterface';
 
 class AuthService {
   private BASE_URL = process.env.REACT_APP_SANCTUM_BACKEND + "/api" || "";
 
-  public async login(): Promise<Task[]> {
+  public async login(values: LoginRequest): Promise<LoginReponse> {
     try {
-      const response = await axios.get<LoginReponse>(`${this.BASE_URL}/login`);
-      return response;
+      const response = await axios.post<LoginReponse>(`${this.BASE_URL}/login`, values);
+      return response.data;
     } catch (error) {
-      console.error('Failed to fetch tasks:', error);
+      console.error('Failed to authenticate user:', error);
       throw error;
     }
   }
 
-  public async register(): Promise<Task[]> {
+  public async register(name: string, email: string, password: string): Promise<Task[]> {
     try {
       const response = await axios.get<Task[]>(`${this.BASE_URL}/register`);
       return response.data;
@@ -46,4 +46,6 @@ class AuthService {
   }
 }
 
-export default new AuthService();
+const authService = new AuthService();
+
+export default authService;

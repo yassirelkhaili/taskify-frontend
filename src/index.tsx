@@ -10,7 +10,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <Router>
     <AuthProvider>
-      <Toaster richColors />
+      <Toaster richColors position='bottom-right'/>
         <App />
     </AuthProvider>
   </Router>
