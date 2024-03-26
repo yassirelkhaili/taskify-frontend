@@ -6,7 +6,13 @@ class TaskService {
 
   public async fetchTasks(): Promise<Task[]> {
     try {
-      const response = await axios.get<Task[]>(`${this.BASE_URL}/tasks`);
+      const token = localStorage.getItem('accessToken');
+      if (!token) throw new Error('No access token found');
+      const response = await axios.get<Task[]>(`${this.BASE_URL}/tasks`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       return response.data;
     } catch (error) {
       console.error('Failed to fetch tasks:', error);

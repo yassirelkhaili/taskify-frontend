@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Task } from '../interfaces/taskInterface';
-import type { LoginReponse, LoginRequest } from '../interfaces/authInterface';
+import type { LoginReponse, LoginRequest, RegisterRequest } from '../interfaces/authInterface';
 
 class AuthService {
   private BASE_URL = process.env.REACT_APP_SANCTUM_BACKEND + "/api" || "";
@@ -10,17 +10,16 @@ class AuthService {
       const response = await axios.post<LoginReponse>(`${this.BASE_URL}/login`, values);
       return response.data;
     } catch (error) {
-      console.error('Failed to authenticate user:', error);
+      console.error('Failed to login user:', error);
       throw error;
     }
   }
 
-  public async register(name: string, email: string, password: string): Promise<Task[]> {
+  public async register(values: RegisterRequest): Promise<void> {
     try {
-      const response = await axios.get<Task[]>(`${this.BASE_URL}/register`);
-      return response.data;
+      await axios.post<void>(`${this.BASE_URL}/register`, values);
     } catch (error) {
-      console.error('Failed to fetch tasks:', error);
+      console.error('Failed to register user:', error);
       throw error;
     }
   }
