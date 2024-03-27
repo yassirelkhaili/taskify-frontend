@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Task, TaskResponse } from '../interfaces/taskInterface';
+import { Submissionvalues } from '../partials/data-table-toolbar';
 
 class TaskService {
   private BASE_URL = process.env.REACT_APP_SANCTUM_BACKEND + "/api" || "";
@@ -20,11 +21,11 @@ class TaskService {
     }
   }
 
-  public async postTask(values: Task): Promise<Task> {
+  public async postTask(values: Submissionvalues): Promise<Task> {
     try {
       const token = JSON.parse(localStorage.getItem("accessToken") || "");
       if (!token) throw new Error('No access token found');
-      const response = await axios.get<Task>(`${this.BASE_URL}/tasks`, {
+      const response = await axios.post<Task>(`${this.BASE_URL}/tasks`, values, {
         headers: {
           Authorization: `Bearer ${token}`
         }

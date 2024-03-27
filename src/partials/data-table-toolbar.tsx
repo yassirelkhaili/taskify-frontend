@@ -14,7 +14,6 @@ import { priorities, statuses } from "../data/data";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-
 import { cn } from "../lib/utils";
 import { Calendar } from "../components/ui/calendar";
 import {
@@ -77,19 +76,18 @@ const formSchema = z.object({
     })
     .min(10, { message: "description must contain at least 10 characters." })
     .max(255, { message: "description must not exceed 255 characters." }),
-  due_date: z
-    .string()
-    .refine((val) => val !== "", {
-      message: "Due date is required.",
-    })
-    .refine((val) => !isNaN(Date.parse(val)), {
-      message: "Invalid date format.",
-    }),
+  due_date: z.date({
+    required_error: "A due date is required.",
+  }),
   priority: z.enum(["high", "medium", "low"], {
     required_error: "Priority is required",
     invalid_type_error: "Invalid priority type",
   }),
 });
+
+export type Submissionvalues = Omit<z.infer<typeof formSchema>, "due_date"> & {
+  due_date: string;
+};
 
 export function DataTableToolbar<TData>({
   table,
@@ -103,15 +101,27 @@ export function DataTableToolbar<TData>({
     defaultValues: {
       title: "",
       description: "",
-      due_date: "",
-      priority: "low",
     },
   });
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    setisLoading(true);
+    const prepareSubmissionValues = (
+      values: z.infer<typeof formSchema>
+    ): Submissionvalues => {
+      const dueDateAsString =
+        values.due_date instanceof Date
+          ? format(values.due_date, "yyyy-MM-dd")
+          : "";
+      return {
+        ...values,
+        due_date: dueDateAsString,
+      };
+    };
+    const submissionValues = prepareSubmissionValues(values);
+    if (isAuthenticated) {
+      setisLoading(true);
     try {
-      // const { data } = await taskService.postTask(values);
+      const response = await taskService.postTask(submissionValues);
       setisLoading(false);
     } catch (error) {
       toast.error(
@@ -119,6 +129,7 @@ export function DataTableToolbar<TData>({
       );
       console.error(error);
       setisLoading(false);
+    }
     }
   };
 
@@ -272,10 +283,13 @@ export function DataTableToolbar<TData>({
                         <SelectContent>
                           {selectPriorities.map((priority: SelectPriority) => {
                             return (
-                              <SelectItem value={priority.value} key={priority.value}>
-                            {priority.label}
-                          </SelectItem>
-                            )
+                              <SelectItem
+                                value={priority.value}
+                                key={priority.value}
+                              >
+                                {priority.label}
+                              </SelectItem>
+                            );
                           })}
                         </SelectContent>
                       </Select>
