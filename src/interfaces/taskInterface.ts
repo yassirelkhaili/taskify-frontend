@@ -17,3 +17,9 @@ export enum TaskStatus {
     due_date: string,
     priority: TaskPriority
   }
+
+  export interface TaskResponse {
+    status: string;
+    messsage: string;
+    data: Array<Task>
+  }
