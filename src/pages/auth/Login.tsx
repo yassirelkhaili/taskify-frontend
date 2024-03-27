@@ -56,8 +56,8 @@ const Login = () => {
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setisLoading(true);
     try {
-      const { bearerToken } = await AuthService.login(values);
-      localStorage.setItem("accessToken", JSON.stringify(bearerToken));
+      const { data } = await AuthService.login(values); //data is bearerToken
+      localStorage.setItem("accessToken", JSON.stringify(data));
       login();
       navigate("/dashboard", { replace: true });
       setisLoading(false);

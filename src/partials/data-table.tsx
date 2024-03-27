@@ -15,7 +15,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-
 import {
   Table,
   TableBody,
@@ -24,7 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "../components/ui/table"
-
+import { Loader2 } from "lucide-react"
 import { DataTablePagination } from "./data-table-pagination"
 import { DataTableToolbar } from "./data-table-toolbar"
 
@@ -108,12 +107,12 @@ export function DataTable<TData, TValue>({
                 </TableRow>
               ))
             ) : (
-              <TableRow>
+              <TableRow className="w-full">
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="text-center"
                 >
-                  No results.
+                  <Loader2 className="h-8 aspect-square animate-spin inline-block"/>
                 </TableCell>
               </TableRow>
             )}

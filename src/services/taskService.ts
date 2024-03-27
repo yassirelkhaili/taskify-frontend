@@ -1,14 +1,14 @@
 import axios from 'axios';
-import { Task } from '../interfaces/taskInterface';
+import { TaskResponse } from '../interfaces/taskInterface';
 
 class TaskService {
   private BASE_URL = process.env.REACT_APP_SANCTUM_BACKEND + "/api" || "";
 
-  public async fetchTasks(): Promise<Task[]> {
+  public async fetchTasks(): Promise<TaskResponse> {
     try {
-      const token = localStorage.getItem('accessToken');
+      const token = JSON.parse(localStorage.getItem("accessToken") || "");
       if (!token) throw new Error('No access token found');
-      const response = await axios.get<Task[]>(`${this.BASE_URL}/tasks`, {
+      const response = await axios.get<TaskResponse>(`${this.BASE_URL}/tasks`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -21,4 +21,6 @@ class TaskService {
   }
 }
 
-export default new TaskService();
+const taskService = new TaskService();
+
+export default taskService;

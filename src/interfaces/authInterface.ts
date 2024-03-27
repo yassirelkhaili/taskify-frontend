@@ -13,7 +13,7 @@ export interface AuthProviderProps {
 export interface LoginReponse {
     status: string,
     message: string,
-    bearerToken: string
+    data: string
 }
 
 export interface LoginRequest {

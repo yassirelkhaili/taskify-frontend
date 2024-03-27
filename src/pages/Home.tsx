@@ -1,13 +1,19 @@
 import { columns } from "../partials/columns"
 import { DataTable } from "../partials/data-table"
 import { UserNav } from "../partials/user-nav";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useLayoutEffect } from "react";
 import taskService from "../services/taskService";
 import { toast } from "sonner";
 import { Task } from "../interfaces/taskInterface";
+import { useAuth } from "../providers/AuthProvider";
 
 export default function Home() {
   const [tasks, settasks] = useState<Array<Task>>([]);
+  const {login} = useAuth();
+
+  useLayoutEffect(() => {
+   localStorage.getItem("accessToken") && login();
+  }, [login])
 
   useEffect(() => {
     fetchTasks();
@@ -16,7 +22,7 @@ export default function Home() {
   const fetchTasks = async () => {
     try {
       const tasks = await taskService.fetchTasks();
-      settasks(tasks);
+      settasks(tasks.data);
     }
       catch (error) {
       toast.error(

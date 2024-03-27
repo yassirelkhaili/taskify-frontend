@@ -12,7 +12,8 @@ export const useAuth = (): AuthContextType => {
 };
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const checkIsAuthenticated: boolean = !!localStorage.getItem("accessToken") || false;
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(checkIsAuthenticated);
 
   const login = () => setIsAuthenticated(true);
   const logout = () => setIsAuthenticated(false);
