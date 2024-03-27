@@ -9,6 +9,11 @@ export enum TaskStatus {
     MEDIUM = "medium",
     HIGH = "high"
   }
+
+  export interface SelectPriority {
+    label: string;
+    value: TaskPriority;
+  }
   
   export interface Task {
     id: number,
