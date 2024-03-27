@@ -122,6 +122,7 @@ export function DataTableToolbar<TData>({
       setisLoading(true);
     try {
       const response = await taskService.postTask(submissionValues);
+      toast.success(response.message);
       setisLoading(false);
     } catch (error) {
       toast.error(

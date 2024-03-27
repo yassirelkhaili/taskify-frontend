@@ -21,11 +21,11 @@ class TaskService {
     }
   }
 
-  public async postTask(values: Submissionvalues): Promise<Task> {
+  public async postTask(values: Submissionvalues): Promise<TaskResponse> {
     try {
       const token = JSON.parse(localStorage.getItem("accessToken") || "");
       if (!token) throw new Error('No access token found');
-      const response = await axios.post<Task>(`${this.BASE_URL}/tasks`, values, {
+      const response = await axios.post<TaskResponse>(`${this.BASE_URL}/tasks`, values, {
         headers: {
           Authorization: `Bearer ${token}`
         }

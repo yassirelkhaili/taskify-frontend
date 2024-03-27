@@ -25,6 +25,6 @@ export enum TaskStatus {
 
   export interface TaskResponse {
     status: string;
-    messsage: string;
+    message: string;
     data: Array<Task>
   }
