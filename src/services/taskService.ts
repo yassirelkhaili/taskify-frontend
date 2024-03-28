@@ -36,6 +36,22 @@ class TaskService {
       throw error;
     }
   }
+
+  public async deleteTask(taskId: number): Promise<TaskResponse> {
+    try {
+      const token = JSON.parse(localStorage.getItem("accessToken") || "");
+      if (!token) throw new Error('No access token found');
+      const response = await axios.delete<TaskResponse>(`${this.BASE_URL}/tasks/${taskId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch tasks:', error);
+      throw error;
+    }
+  }
 }
 
 const taskService = new TaskService();
