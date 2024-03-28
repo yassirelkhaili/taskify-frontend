@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { Task } from "./taskInterface";
 
 export interface AuthContextType {
     isAuthenticated: boolean;
@@ -8,6 +9,17 @@ export interface AuthContextType {
   
 export interface AuthProviderProps {
     children: ReactNode;
+}
+
+export interface UiContextType {
+  tasks: Array<Task>;
+  setTasks: React.Dispatch<React.SetStateAction<Array<Task>>>;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+export interface AuthProviderProps {
+  children: ReactNode;
 }
 
 export interface LoginReponse {

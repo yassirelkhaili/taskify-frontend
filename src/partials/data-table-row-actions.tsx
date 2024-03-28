@@ -11,14 +11,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu"
+import taskService from "../services/taskService"
+import { toast } from "sonner"
+
+interface WithId {
+  id: number;
+}
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>
 }
 
-export function DataTableRowActions<TData>({
+export function DataTableRowActions<TData extends WithId>({
   row,
 }: DataTableRowActionsProps<TData>) {
+  const handleClick = async() => {
+    const elementId: number = row.original.id;
+    try {
+      const response = await taskService.deleteTask(elementId);
+      await taskService.fetchTasks();
+      toast.success(response.message);
+    } catch (error) {
+      toast.error(
+        "Failed to delete task. Please check your credentials and try again."
+      );
+      console.error(error);
+    }
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -33,7 +52,7 @@ export function DataTableRowActions<TData>({
       <DropdownMenuContent align="end" className="w-[160px]">
         <DropdownMenuItem>Edit</DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={handleClick}>
           Delete
         </DropdownMenuItem>
       </DropdownMenuContent>
