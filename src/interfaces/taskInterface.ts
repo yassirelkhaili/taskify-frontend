@@ -15,13 +15,21 @@ export enum TaskStatus {
     value: TaskPriority;
   }
   
-  export interface Task {
-    id: number,
-    title: string,
-    status: TaskStatus
-    due_date: string,
-    priority: TaskPriority
-  }
+export interface Task {
+  id: number;
+  title: string;
+  status: TaskStatus;
+  due_date: string;
+  priority: TaskPriority;
+}
+
+export interface TaskInput {
+  title: string;
+  description: string;
+  status?: TaskStatus;
+  due_date?: Date;
+  priority?: TaskPriority;
+};
 
   export interface TaskResponse {
     status: string;

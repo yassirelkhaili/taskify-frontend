@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Task, TaskResponse } from '../interfaces/taskInterface';
+import { TaskResponse } from '../interfaces/taskInterface';
 import { Submissionvalues } from '../partials/data-table-toolbar';
 
 class TaskService {

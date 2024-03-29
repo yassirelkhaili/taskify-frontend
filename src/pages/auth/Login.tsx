@@ -14,9 +14,10 @@ import { Input } from "../../components/ui/input";
 import { toast } from "sonner";
 import Loader from "../../components/ui/loader";
 import AuthService from "../../services/authService";
-import { useState, useLayoutEffect } from "react";
+import { useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../providers/AuthProvider";
+import { useUi } from "../../providers/UiProvider";
 
 const formSchema = z.object({
   email: z
@@ -37,7 +38,7 @@ const formSchema = z.object({
 });
 
 const Login = () => {
-  const [isLoading, setisLoading] = useState<boolean>(false);
+  const { isLoading, setIsLoading } = useUi();
   const { isAuthenticated, login } = useAuth();
   const navigate = useNavigate();
 
@@ -54,19 +55,19 @@ const Login = () => {
   });
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    setisLoading(true);
+    setIsLoading(true);
     try {
       const { data } = await AuthService.login(values); //data is bearerToken
       localStorage.setItem("accessToken", JSON.stringify(data));
       login();
       navigate("/dashboard", { replace: true });
-      setisLoading(false);
+      setIsLoading(false);
     } catch (error) {
       toast.error(
         "Failed to login. Please check your credentials and try again."
       );
       console.error(error);
-      setisLoading(false);
+      setIsLoading(false);
     }
   };
 

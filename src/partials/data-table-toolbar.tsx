@@ -38,11 +38,10 @@ import {
   FormLabel,
   FormMessage,
 } from "../components/ui/form";
-import { useState } from "react";
 import { useAuth } from "../providers/AuthProvider";
 import { toast } from "sonner";
 import taskService from "../services/taskService";
-import { TaskPriority, SelectPriority } from "../interfaces/taskInterface";
+import { TaskPriority, SelectPriority, TaskStatus } from "../interfaces/taskInterface";
 import {
   Select,
   SelectContent,
@@ -50,6 +49,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
+import { useUi } from "../providers/UiProvider";
+import { formSchema } from "../data/schema";
+import { useEffect } from "react";
+import { ModalMode } from "../interfaces/authInterface";
 
 const selectPriorities: Array<SelectPriority> = [
   { label: "Low", value: TaskPriority.LOW },
@@ -61,30 +64,6 @@ interface DataTableToolbarProps<TData> {
   table: Table<TData>;
 }
 
-const formSchema = z.object({
-  title: z
-    .string({
-      required_error: "title is required",
-      invalid_type_error: "invalid input type",
-    })
-    .min(10, { message: "title must contain at least 5 characters." })
-    .max(100, { message: "title must not exceed 100 characters." }),
-  description: z
-    .string({
-      required_error: "password is required",
-      invalid_type_error: "invalid input type",
-    })
-    .min(10, { message: "description must contain at least 10 characters." })
-    .max(255, { message: "description must not exceed 255 characters." }),
-  due_date: z.date({
-    required_error: "A due date is required.",
-  }),
-  priority: z.enum(["high", "medium", "low"], {
-    required_error: "Priority is required",
-    invalid_type_error: "Invalid priority type",
-  }),
-});
-
 export type Submissionvalues = Omit<z.infer<typeof formSchema>, "due_date"> & {
   due_date: string;
 };
@@ -93,16 +72,33 @@ export function DataTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
-  const [isLoading, setisLoading] = useState<boolean>(false);
+  const {
+    isLoading,
+    setIsLoading,
+    setIsModalOpen,
+    isModalOpen,
+    modalMode,
+  } = useUi();
   const { isAuthenticated } = useAuth();
+  const { updatedFormData } = useUi();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-    },
+    defaultValues: updatedFormData,
   });
+
+  useEffect(() => {
+    if (modalMode === ModalMode.EDIT) {
+      form.reset(updatedFormData);
+    } else {
+      form.reset({
+        title: "",
+        description: "",
+        priority: "" as TaskPriority,
+        due_date: "" as unknown as Date // this is ugly as hell I promise to come back and refactor (said every programmer ever)
+      });
+    }
+  }, [updatedFormData, form, modalMode]);
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     const prepareSubmissionValues = (
@@ -119,18 +115,18 @@ export function DataTableToolbar<TData>({
     };
     const submissionValues = prepareSubmissionValues(values);
     if (isAuthenticated) {
-      setisLoading(true);
-    try {
-      const response = await taskService.postTask(submissionValues);
-      toast.success(response.message);
-      setisLoading(false);
-    } catch (error) {
-      toast.error(
-        "Failed to login. Please check your credentials and try again."
-      );
-      console.error(error);
-      setisLoading(false);
-    }
+      setIsLoading(true);
+      try {
+        const response = await taskService.postTask(submissionValues);
+        toast.success(response.message);
+        setIsLoading(false);
+      } catch (error) {
+        toast.error(
+          "Failed to login. Please check your credentials and try again."
+        );
+        console.error(error);
+        setIsLoading(false);
+      }
     }
   };
 
@@ -171,7 +167,7 @@ export function DataTableToolbar<TData>({
         )}
       </div>
       <div className="flex gap-2">
-        <Dialog>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
             <Button
               variant="outline"
@@ -183,9 +179,12 @@ export function DataTableToolbar<TData>({
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Add Task</DialogTitle>
+              <DialogTitle>
+                {modalMode === ModalMode.ADD ? "Add task" : "Edit task"}
+              </DialogTitle>
               <DialogDescription>
-                Create new tasks here. Click save when you're done.
+                {modalMode === ModalMode.ADD ? "Create" : "Edit"} new tasks
+                here. Click save when you're done.
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
@@ -301,7 +300,7 @@ export function DataTableToolbar<TData>({
                 <DialogFooter>
                   {!isLoading ? (
                     <Button type="submit" className="bg-blue-600">
-                      Create task
+                      {modalMode === ModalMode.ADD ? "Create task" : "Edit task"}
                     </Button>
                   ) : (
                     <Loader />

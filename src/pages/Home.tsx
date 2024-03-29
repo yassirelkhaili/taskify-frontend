@@ -1,14 +1,14 @@
 import { columns } from "../partials/columns"
 import { DataTable } from "../partials/data-table"
 import { UserNav } from "../partials/user-nav";
-import { useEffect, useState, useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import taskService from "../services/taskService";
 import { toast } from "sonner";
-import { Task } from "../interfaces/taskInterface";
 import { useAuth } from "../providers/AuthProvider";
+import { useUi } from "../providers/UiProvider";
 
 export default function Home() {
-  const [tasks, settasks] = useState<Array<Task>>([]);
+  const { tasks, setTasks} = useUi();
   const {login} = useAuth();
 
   useLayoutEffect(() => {
@@ -16,21 +16,21 @@ export default function Home() {
   }, [login])
 
   useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const newTasks = await taskService.fetchTasks();
+        setTasks(newTasks.data);
+      }
+        catch (error) {
+        toast.error(
+          "Failed fetch tasks. Refresh the page and try again."
+        );
+        console.error(error);
+      }
+    };
     fetchTasks();
-  }, [])
-  
-  const fetchTasks = async () => {
-    try {
-      const tasks = await taskService.fetchTasks();
-      settasks(tasks.data);
-    }
-      catch (error) {
-      toast.error(
-        "Failed fetch tasks. Refresh the page and try again."
-      );
-      console.error(error);
-    }
-  };
+  }, [setTasks])
+
   return (
     <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
         <div className="flex items-center justify-between space-y-2">

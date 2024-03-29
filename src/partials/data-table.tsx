@@ -26,6 +26,7 @@ import {
 import { Loader2 } from "lucide-react"
 import { DataTablePagination } from "./data-table-pagination"
 import { DataTableToolbar } from "./data-table-toolbar"
+import { useUi } from "../providers/UiProvider"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -43,6 +44,7 @@ export function DataTable<TData, TValue>({
     []
   )
   const [sorting, setSorting] = React.useState<SortingState>([])
+  const { isLoading } = useUi();
 
   const table = useReactTable({
     data,
@@ -90,7 +92,7 @@ export function DataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {table.getRowModel().rows?.length && !isLoading ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
