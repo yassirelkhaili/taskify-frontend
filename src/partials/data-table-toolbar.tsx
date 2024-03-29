@@ -38,7 +38,6 @@ import {
   FormLabel,
   FormMessage,
 } from "../components/ui/form";
-import { useState } from "react";
 import { useAuth } from "../providers/AuthProvider";
 import { toast } from "sonner";
 import taskService from "../services/taskService";
@@ -50,6 +49,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
+import { useUi } from "../providers/UiProvider";
+import { formSchema } from "../data/schema";
+import { useEffect } from "react";
 
 const selectPriorities: Array<SelectPriority> = [
   { label: "Low", value: TaskPriority.LOW },
@@ -61,30 +63,6 @@ interface DataTableToolbarProps<TData> {
   table: Table<TData>;
 }
 
-const formSchema = z.object({
-  title: z
-    .string({
-      required_error: "title is required",
-      invalid_type_error: "invalid input type",
-    })
-    .min(10, { message: "title must contain at least 5 characters." })
-    .max(100, { message: "title must not exceed 100 characters." }),
-  description: z
-    .string({
-      required_error: "password is required",
-      invalid_type_error: "invalid input type",
-    })
-    .min(10, { message: "description must contain at least 10 characters." })
-    .max(255, { message: "description must not exceed 255 characters." }),
-  due_date: z.date({
-    required_error: "A due date is required.",
-  }),
-  priority: z.enum(["high", "medium", "low"], {
-    required_error: "Priority is required",
-    invalid_type_error: "Invalid priority type",
-  }),
-});
-
 export type Submissionvalues = Omit<z.infer<typeof formSchema>, "due_date"> & {
   due_date: string;
 };
@@ -93,16 +71,19 @@ export function DataTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
-  const [isLoading, setisLoading] = useState<boolean>(false);
+  const {isLoading, setIsLoading, setIsModalOpen, isModalOpen} = useUi();
   const { isAuthenticated } = useAuth();
+  const { updatedFormData } = useUi();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-    },
+    defaultValues: updatedFormData,
   });
+
+  useEffect(() => {
+    form.reset(updatedFormData);
+  }, [updatedFormData, form])
+  
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     const prepareSubmissionValues = (
@@ -119,17 +100,17 @@ export function DataTableToolbar<TData>({
     };
     const submissionValues = prepareSubmissionValues(values);
     if (isAuthenticated) {
-      setisLoading(true);
+      setIsLoading(true);
     try {
       const response = await taskService.postTask(submissionValues);
       toast.success(response.message);
-      setisLoading(false);
+      setIsLoading(false);
     } catch (error) {
       toast.error(
         "Failed to login. Please check your credentials and try again."
       );
       console.error(error);
-      setisLoading(false);
+      setIsLoading(false);
     }
     }
   };
@@ -171,7 +152,7 @@ export function DataTableToolbar<TData>({
         )}
       </div>
       <div className="flex gap-2">
-        <Dialog>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
             <Button
               variant="outline"

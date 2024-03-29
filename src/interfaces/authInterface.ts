@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { Task } from "./taskInterface";
+import type { Task, TaskInput } from "./taskInterface";
 
 export interface AuthContextType {
     isAuthenticated: boolean;
@@ -11,11 +11,22 @@ export interface AuthProviderProps {
     children: ReactNode;
 }
 
+export enum ModalMode {
+  ADD = "add",
+  EDIT = "edit",
+}
+
 export interface UiContextType {
   tasks: Array<Task>;
   setTasks: React.Dispatch<React.SetStateAction<Array<Task>>>;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  isModalOpen: boolean;
+  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
+  modalMode: ModalMode;
+  setModalMode: React.Dispatch<React.SetStateAction<ModalMode>>
+  updatedFormData: TaskInput;
+  updateFormData: (newData: TaskInput) => void;
 }
 
 export interface AuthProviderProps {

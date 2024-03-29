@@ -1,7 +1,8 @@
 import { createContext, useContext, useState } from 'react';
 import type { UiContextType } from '../interfaces/authInterface';
 import type { ReactNode } from 'react';
-import type { Task } from '../interfaces/taskInterface';
+import type { Task, TaskInput } from '../interfaces/taskInterface';
+import { ModalMode } from '../interfaces/authInterface';
 
 const UiContext = createContext<UiContextType | undefined>(undefined);
 
@@ -16,9 +17,17 @@ export const useUi = (): UiContextType => {
 export const UiProvider = ({ children }: {children: ReactNode}) => {
   const [tasks, setTasks] = useState<Array<Task>>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [modalMode, setModalMode] = useState<ModalMode>(ModalMode.ADD);
+  const [updatedFormData, setUpdatedFormData] = useState<TaskInput>({
+    title: "",
+    description: "",
+  });
+
+  const updateFormData = (newData: TaskInput) => setUpdatedFormData(newData);
 
   return (
-    <UiContext.Provider value={{ isLoading, setIsLoading, tasks, setTasks }}>
+    <UiContext.Provider value={{ isLoading, setIsLoading, tasks, setTasks, isModalOpen, setIsModalOpen, modalMode, setModalMode, updatedFormData, updateFormData}}>
       {children}
     </UiContext.Provider>
   );
