@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { useUi } from "../providers/UiProvider";
 import { ModalMode } from "../interfaces/authInterface";
 import type { Task, TaskInput } from "../interfaces/taskInterface";
+import { useEffect } from "react";
 
 interface withId {
   id: number;
@@ -35,6 +36,8 @@ export function DataTableRowActions<TData extends withId>({
     setModalMode,
     updateFormData,
     tasks,
+    isModalOpen,
+    modalMode
   } = useUi();
 
   const handleDelete = async (): Promise<void> => {
@@ -54,6 +57,10 @@ export function DataTableRowActions<TData extends withId>({
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!isModalOpen && modalMode === ModalMode.EDIT) setModalMode(ModalMode.ADD);
+  }, [isModalOpen]);
 
   const handleEdit = async (): Promise<void> => {
     setModalMode(ModalMode.EDIT);

@@ -41,7 +41,7 @@ import {
 import { useAuth } from "../providers/AuthProvider";
 import { toast } from "sonner";
 import taskService from "../services/taskService";
-import { TaskPriority, SelectPriority } from "../interfaces/taskInterface";
+import { TaskPriority, SelectPriority, TaskStatus } from "../interfaces/taskInterface";
 import {
   Select,
   SelectContent,
@@ -52,6 +52,7 @@ import {
 import { useUi } from "../providers/UiProvider";
 import { formSchema } from "../data/schema";
 import { useEffect } from "react";
+import { ModalMode } from "../interfaces/authInterface";
 
 const selectPriorities: Array<SelectPriority> = [
   { label: "Low", value: TaskPriority.LOW },
@@ -71,7 +72,13 @@ export function DataTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
-  const {isLoading, setIsLoading, setIsModalOpen, isModalOpen} = useUi();
+  const {
+    isLoading,
+    setIsLoading,
+    setIsModalOpen,
+    isModalOpen,
+    modalMode,
+  } = useUi();
   const { isAuthenticated } = useAuth();
   const { updatedFormData } = useUi();
 
@@ -81,9 +88,17 @@ export function DataTableToolbar<TData>({
   });
 
   useEffect(() => {
-    form.reset(updatedFormData);
-  }, [updatedFormData, form])
-  
+    if (modalMode === ModalMode.EDIT) {
+      form.reset(updatedFormData);
+    } else {
+      form.reset({
+        title: "",
+        description: "",
+        priority: "" as TaskPriority,
+        due_date: "" as unknown as Date // this is ugly as hell I promise to come back and refactor (said every programmer ever)
+      });
+    }
+  }, [updatedFormData, form, modalMode]);
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     const prepareSubmissionValues = (
@@ -101,17 +116,17 @@ export function DataTableToolbar<TData>({
     const submissionValues = prepareSubmissionValues(values);
     if (isAuthenticated) {
       setIsLoading(true);
-    try {
-      const response = await taskService.postTask(submissionValues);
-      toast.success(response.message);
-      setIsLoading(false);
-    } catch (error) {
-      toast.error(
-        "Failed to login. Please check your credentials and try again."
-      );
-      console.error(error);
-      setIsLoading(false);
-    }
+      try {
+        const response = await taskService.postTask(submissionValues);
+        toast.success(response.message);
+        setIsLoading(false);
+      } catch (error) {
+        toast.error(
+          "Failed to login. Please check your credentials and try again."
+        );
+        console.error(error);
+        setIsLoading(false);
+      }
     }
   };
 
@@ -164,9 +179,12 @@ export function DataTableToolbar<TData>({
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Add Task</DialogTitle>
+              <DialogTitle>
+                {modalMode === ModalMode.ADD ? "Add task" : "Edit task"}
+              </DialogTitle>
               <DialogDescription>
-                Create new tasks here. Click save when you're done.
+                {modalMode === ModalMode.ADD ? "Create" : "Edit"} new tasks
+                here. Click save when you're done.
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
@@ -282,7 +300,7 @@ export function DataTableToolbar<TData>({
                 <DialogFooter>
                   {!isLoading ? (
                     <Button type="submit" className="bg-blue-600">
-                      Create task
+                      {modalMode === ModalMode.ADD ? "Create task" : "Edit task"}
                     </Button>
                   ) : (
                     <Loader />
