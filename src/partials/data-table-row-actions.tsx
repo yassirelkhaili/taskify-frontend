@@ -37,7 +37,8 @@ export function DataTableRowActions<TData extends withId>({
     updateFormData,
     tasks,
     isModalOpen,
-    modalMode
+    modalMode,
+    setSelectedRow
   } = useUi();
 
   const handleDelete = async (): Promise<void> => {
@@ -63,6 +64,7 @@ export function DataTableRowActions<TData extends withId>({
   }, [isModalOpen]);
 
   const handleEdit = async (): Promise<void> => {
+    setSelectedRow(row.original.id);
     setModalMode(ModalMode.EDIT);
     setIsModalOpen(true);
     const selectedTask: Task | undefined = tasks.find(
