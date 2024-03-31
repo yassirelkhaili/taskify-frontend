@@ -14,10 +14,11 @@ import { Input } from "../../components/ui/input";
 import { toast } from "sonner";
 import Loader from "../../components/ui/loader";
 import AuthService from "../../services/authService";
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../providers/AuthProvider";
 import { useUi } from "../../providers/UiProvider";
+import { Navigate } from "react-router-dom";
 
 const formSchema = z.object({
   email: z
@@ -39,12 +40,8 @@ const formSchema = z.object({
 
 const Login = () => {
   const { isLoading, setIsLoading } = useUi();
-  const { isAuthenticated, login } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
-
-  useLayoutEffect(() => {
-    isAuthenticated && navigate("/dashboard", { replace: true });
-  }, [isAuthenticated, navigate]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

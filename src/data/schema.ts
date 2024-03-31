@@ -29,6 +29,10 @@ export const formSchema = z.object({
     required_error: "Priority is required",
     invalid_type_error: "Invalid priority type",
   }),
+  status: z.enum(["pending", "in_progress", "completed"], {
+    required_error: "Status is required",
+    invalid_type_error: "Invalid status type",
+  })
 });
 
 export type Task = z.infer<typeof taskSchema>
