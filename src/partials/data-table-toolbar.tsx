@@ -41,7 +41,11 @@ import {
 import { useAuth } from "../providers/AuthProvider";
 import { toast } from "sonner";
 import taskService from "../services/taskService";
-import { TaskPriority, SelectPriority, TaskStatus } from "../interfaces/taskInterface";
+import {
+  TaskPriority,
+  SelectPriority,
+  TaskResponse,
+} from "../interfaces/taskInterface";
 import {
   Select,
   SelectContent,
@@ -72,13 +76,8 @@ export function DataTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
-  const {
-    isLoading,
-    setIsLoading,
-    setIsModalOpen,
-    isModalOpen,
-    modalMode,
-  } = useUi();
+  const { isLoading, setIsLoading, setIsModalOpen, isModalOpen, modalMode, selectedRow, setSelectedRow, setTasks} =
+    useUi();
   const { isAuthenticated } = useAuth();
   const { updatedFormData } = useUi();
 
@@ -95,7 +94,7 @@ export function DataTableToolbar<TData>({
         title: "",
         description: "",
         priority: "" as TaskPriority,
-        due_date: "" as unknown as Date // this is ugly as hell I promise to come back and refactor (said every programmer ever)
+        due_date: "" as unknown as Date, // this is ugly as hell I promise to come back and refactor (said every programmer ever)
       });
     }
   }, [updatedFormData, form, modalMode]);
@@ -117,8 +116,22 @@ export function DataTableToolbar<TData>({
     if (isAuthenticated) {
       setIsLoading(true);
       try {
-        const response = await taskService.postTask(submissionValues);
-        toast.success(response.message);
+        let response: TaskResponse;
+        if (modalMode === ModalMode.ADD) {
+          response = await taskService.postTask(submissionValues);
+        }
+        else {
+          if (selectedRow) {
+            response = await taskService.editTask(submissionValues, selectedRow);
+            toast.success(response.message);
+          } else {
+            const error: string = "No row has been selected for edition, selected another element";
+            console.error(error);
+            toast.error(error);
+          }
+        }
+        const newTasks = await taskService.fetchTasks();
+        setTasks(newTasks.data);
         setIsLoading(false);
       } catch (error) {
         toast.error(
@@ -128,6 +141,8 @@ export function DataTableToolbar<TData>({
         setIsLoading(false);
       }
     }
+    setIsModalOpen(false);
+    setSelectedRow(undefined);
   };
 
   return (
@@ -300,7 +315,9 @@ export function DataTableToolbar<TData>({
                 <DialogFooter>
                   {!isLoading ? (
                     <Button type="submit" className="bg-blue-600">
-                      {modalMode === ModalMode.ADD ? "Create task" : "Edit task"}
+                      {modalMode === ModalMode.ADD
+                        ? "Create task"
+                        : "Edit task"}
                     </Button>
                   ) : (
                     <Loader />

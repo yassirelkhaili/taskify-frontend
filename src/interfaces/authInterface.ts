@@ -27,6 +27,8 @@ export interface UiContextType {
   setModalMode: React.Dispatch<React.SetStateAction<ModalMode>>
   updatedFormData: TaskInput;
   updateFormData: (newData: TaskInput) => void;
+  selectedRow: number | undefined;
+  setSelectedRow: React.Dispatch<React.SetStateAction<UiContextType['selectedRow']>>
 }
 
 export interface AuthProviderProps {
