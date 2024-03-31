@@ -1,4 +1,4 @@
-export enum TaskStatus {
+export enum TaskStatuses {
     COMPLETED = "completed",
     PENDING = "pending",
     IN_PROGRESS = "in_progress"
@@ -14,11 +14,16 @@ export enum TaskStatus {
     label: string;
     value: TaskPriority;
   }
+
+  export interface SelectStatus {
+    label: string;
+    value: TaskStatuses;
+  }
   
 export interface Task {
   id: number;
   title: string;
-  status: TaskStatus;
+  status: TaskStatuses;
   due_date: string;
   priority: TaskPriority;
 }
@@ -26,7 +31,7 @@ export interface Task {
 export interface TaskInput {
   title: string;
   description: string;
-  status?: TaskStatus;
+  status?: TaskStatuses;
   due_date?: Date;
   priority?: TaskPriority;
 };

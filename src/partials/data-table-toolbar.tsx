@@ -45,6 +45,8 @@ import {
   TaskPriority,
   SelectPriority,
   TaskResponse,
+  SelectStatus,
+  TaskStatuses,
 } from "../interfaces/taskInterface";
 import {
   Select,
@@ -64,6 +66,12 @@ const selectPriorities: Array<SelectPriority> = [
   { label: "High", value: TaskPriority.HIGH },
 ];
 
+const selectStatuses: Array<SelectStatus> = [
+  { label: "pending", value: TaskStatuses.PENDING },
+  { label: "in progress", value: TaskStatuses.IN_PROGRESS },
+  { label: "completed", value: TaskStatuses.COMPLETED },
+];
+
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
 }
@@ -76,8 +84,16 @@ export function DataTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
-  const { isLoading, setIsLoading, setIsModalOpen, isModalOpen, modalMode, selectedRow, setSelectedRow, setTasks} =
-    useUi();
+  const {
+    isLoading,
+    setIsLoading,
+    setIsModalOpen,
+    isModalOpen,
+    modalMode,
+    selectedRow,
+    setSelectedRow,
+    setTasks,
+  } = useUi();
   const { isAuthenticated } = useAuth();
   const { updatedFormData } = useUi();
 
@@ -85,6 +101,11 @@ export function DataTableToolbar<TData>({
     resolver: zodResolver(formSchema),
     defaultValues: updatedFormData,
   });
+
+  useEffect(() => {
+    console.log(isLoading)
+  }, [isLoading])
+  
 
   useEffect(() => {
     if (modalMode === ModalMode.EDIT) {
@@ -95,6 +116,7 @@ export function DataTableToolbar<TData>({
         description: "",
         priority: "" as TaskPriority,
         due_date: "" as unknown as Date, // this is ugly as hell I promise to come back and refactor (said every programmer ever)
+        status: "" as TaskStatuses,
       });
     }
   }, [updatedFormData, form, modalMode]);
@@ -119,20 +141,21 @@ export function DataTableToolbar<TData>({
         let response: TaskResponse;
         if (modalMode === ModalMode.ADD) {
           response = await taskService.postTask(submissionValues);
-        }
-        else {
+          toast.success(response.message);
+        } else {
           if (selectedRow) {
-            response = await taskService.editTask(submissionValues, selectedRow);
+            response = await taskService.editTask(
+              submissionValues,
+              selectedRow
+            );
             toast.success(response.message);
           } else {
-            const error: string = "No row has been selected for edition, selected another element";
+            const error: string =
+              "No row has been selected for edition, selected another element";
             console.error(error);
             toast.error(error);
           }
         }
-        const newTasks = await taskService.fetchTasks();
-        setTasks(newTasks.data);
-        setIsLoading(false);
       } catch (error) {
         toast.error(
           "Failed to login. Please check your credentials and try again."
@@ -141,6 +164,9 @@ export function DataTableToolbar<TData>({
         setIsLoading(false);
       }
     }
+    const newTasks = await taskService.fetchTasks();
+    setTasks(newTasks.data);
+    setIsLoading(false);
     setIsModalOpen(false);
     setSelectedRow(undefined);
   };
@@ -303,6 +329,38 @@ export function DataTableToolbar<TData>({
                                 key={priority.value}
                               >
                                 {priority.label}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>status</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Task Status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {selectStatuses.map((status: SelectStatus) => {
+                            return (
+                              <SelectItem
+                                value={status.value}
+                                key={status.value}
+                              >
+                                {status.label}
                               </SelectItem>
                             );
                           })}
